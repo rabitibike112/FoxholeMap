@@ -15,6 +15,6 @@ public class PlacedSelf : MonoBehaviour
     {
         transform.up = Ref.MouseFollower.transform.position - transform.position;
         Shower.text = "Dist:" + ((Vector3.Distance(this.transform.position, Ref.MouseFollower.transform.position) * 80f) / 0.6f).ToString("N1") + "M\n";
-        Shower.text += "Azim:" + transform.rotation.eulerAngles.z.ToString("N1");
+        Shower.text += "Azim:" + (360f - transform.rotation.eulerAngles.z).ToString("N1");
     }
 }
