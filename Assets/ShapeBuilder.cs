@@ -111,7 +111,9 @@ public class ShapeBuilder : MonoBehaviour
         InstObj.transform.tag = "AREA";
         InstObj.AddComponent<Area>();
         InstObj.transform.position = Center;
-        foreach(Vector3 x in Verts)
+        InstObj.GetComponent<Renderer>().material.color = GameObject.Find("Canvas").transform.GetComponent<ColorPicker>().CurrectColor;
+        InstObj.GetComponent<Area>().Color = GameObject.Find("Canvas").transform.GetComponent<ColorPicker>().CurrentColorId;
+        foreach (Vector3 x in Verts)
         {
             InstObj.GetComponent<Area>().Vertexes.Add(new Vector2(x.x, x.y));
         }
@@ -121,7 +123,7 @@ public class ShapeBuilder : MonoBehaviour
         InstObj = null;
     }
 
-    public void GenerateAreaLoad(List<Vector2> VertexList,string text, Vector3 Center)
+    public void GenerateAreaLoad(List<Vector2> VertexList,string text, Vector3 Center,int Color)
     {
         GameObject TempInstObj = Instantiate(Plane, null);
         Mesh mesh;
@@ -172,6 +174,8 @@ public class ShapeBuilder : MonoBehaviour
             TempInstObj.GetComponent<Area>().Vertexes.Add(new Vector2(x.x, x.y));
         }
         GameObject temp = Instantiate(WorldText, null);
+        TempInstObj.GetComponent<Renderer>().material.color = GameObject.Find("Canvas").GetComponent<ColorPicker>().GetColorById(Color);
+        TempInstObj.GetComponent<Area>().Color = Color;
         temp.transform.GetChild(0).transform.Find("Placeholder").GetComponent<Text>().text = text;
         temp.transform.position = Center;
         temp.transform.SetParent(TempInstObj.transform);

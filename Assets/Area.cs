@@ -5,4 +5,5 @@ using UnityEngine;
 public class Area : MonoBehaviour
 {
     public List<Vector2> Vertexes = new List<Vector2>();
+    public int Color;
 }

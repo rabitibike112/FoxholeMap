@@ -41,23 +41,24 @@ public class Build : MonoBehaviour
         DeleteStuff.onClick.AddListener(DeleteSomeStuff);
         PlaceSelf.onClick.AddListener(PlaceSelfMarker);
         Exit.onClick.AddListener(ExitApp);
-        
+
         Container = GameObject.Find("UserBuiltStructures").gameObject;
+        LoadASave();
     }
 
     private void LoadASave()
     {
-        string input;
-        string[] Split;
         if (System.IO.File.Exists("Save.txt") == true)
         {
+            string input;
+            string[] Split;
             input = System.IO.File.ReadAllText("Save.txt", System.Text.Encoding.Default);
             Split = input.Split(';');
             int index = 0;
             //foreach(string x in Split) { Debug.LogError(x); }
             while (index < Split.Length)
             {
-                if(Split[index].Contains("!")==true)//obs structure
+                if (Split[index].Contains("!") == true)//obs structure
                 {
                     int StructType;
                     float PosX, PosY;
@@ -71,19 +72,20 @@ public class Build : MonoBehaviour
                 }
                 if (Split[index].Contains("@") == true)
                 {
-                    string TextField = Split[index + 1];
+                    int Color = int.Parse(Split[index + 1]);
+                    string TextField = Split[index + 2];
                     int NumberOfVerts2;
-                    Vector3 Center = new Vector3(float.Parse(Split[index + 2]), float.Parse(Split[index + 3]), 0);
-                    int.TryParse(Split[index + 4], out NumberOfVerts2);
+                    Vector3 Center = new Vector3(float.Parse(Split[index + 3]), float.Parse(Split[index + 4]), 0);
+                    int.TryParse(Split[index + 5], out NumberOfVerts2);
                     List<Vector2> Vertexes = new List<Vector2>();
-                    for(int x1 = index + 5; x1 < index + 5 + NumberOfVerts2; x1+=2)
+                    for (int x1 = index + 6; x1 < index + 6 + NumberOfVerts2; x1 += 2)
                     {
                         float tempX, tempY;
                         float.TryParse(Split[x1], out tempX);
                         float.TryParse(Split[x1 + 1], out tempY);
                         Vertexes.Add(new Vector2(tempX, tempY));
                     }
-                    Ref.MouseFollower.GetComponent<ShapeBuilder>().GenerateAreaLoad(Vertexes, TextField, Center);
+                    Ref.MouseFollower.GetComponent<ShapeBuilder>().GenerateAreaLoad(Vertexes, TextField, Center, Color); // add color
                     Vertexes.Clear();
                     index += 1 + NumberOfVerts2;
                 }
@@ -94,9 +96,9 @@ public class Build : MonoBehaviour
     private void SaveALoad()
     {
         string output = "";
-        for(int x1 = 0; x1 < Container.transform.childCount; x1++)
+        for (int x1 = 0; x1 < Container.transform.childCount; x1++)
         {
-            if(Container.transform.GetChild(x1).tag == "OBS")
+            if (Container.transform.GetChild(x1).tag == "OBS")
             {
                 GameObject tempChild = Container.transform.GetChild(x1).gameObject;
                 output += "!;";
@@ -104,14 +106,15 @@ public class Build : MonoBehaviour
                 output += tempChild.transform.position.x.ToString("N3") + ";";
                 output += tempChild.transform.position.y.ToString("N3") + ";";
             }
-            if(Container.transform.GetChild(x1).tag == "AREA")
+            if (Container.transform.GetChild(x1).tag == "AREA")
             {
                 output += "@;";
+                output += Container.transform.GetChild(x1).GetComponent<Area>().Color + ";";
                 if (Container.transform.GetChild(x1).transform.GetChild(0).transform.GetChild(0).transform.GetChild(2).GetComponent<Text>().text.Length > 1)
                 {
                     output += Container.transform.GetChild(x1).transform.GetChild(0).transform.GetChild(0).transform.GetChild(2).GetComponent<Text>().text + ";";
                 }
-                else if(Container.transform.GetChild(x1).transform.GetChild(0).transform.GetChild(0).transform.GetChild(1).GetComponent<Text>().text.Length > 1)
+                else if (Container.transform.GetChild(x1).transform.GetChild(0).transform.GetChild(0).transform.GetChild(1).GetComponent<Text>().text.Length > 1)
                 {
                     output += Container.transform.GetChild(x1).transform.GetChild(0).transform.GetChild(0).transform.GetChild(1).GetComponent<Text>().text + ";";
                 }
@@ -121,7 +124,7 @@ public class Build : MonoBehaviour
                 }
                 output += Container.transform.GetChild(x1).transform.position.x + ";";
                 output += Container.transform.GetChild(x1).transform.position.y + ";";
-                output += (Container.transform.GetChild(x1).GetComponent<Area>().Vertexes.Count*2) + ";";
+                output += (Container.transform.GetChild(x1).GetComponent<Area>().Vertexes.Count * 2) + ";";
                 foreach (Vector2 x in Container.transform.GetChild(x1).GetComponent<Area>().Vertexes)
                 {
                     output += x.x.ToString("N3") + ";";
@@ -133,7 +136,7 @@ public class Build : MonoBehaviour
     }
     private void PlaceObject(int Index)
     {
-        if(Ref.MouseFollower.transform.childCount == 0)
+        if (Ref.MouseFollower.transform.childCount == 0)
         {
             GameObject temp = Instantiate(BunkerPieces[Index], Ref.MouseFollower.transform);
         }
@@ -156,7 +159,7 @@ public class Build : MonoBehaviour
             }
             ObsTowersActive = true;
         }
-        
+
     }
     private void ToggleSafeHouses()
     {
@@ -185,7 +188,7 @@ public class Build : MonoBehaviour
 
     private void PlaceSelfMarker()
     {
-        if(Ref.PlacedSelf == null)
+        if (Ref.PlacedSelf == null)
         {
             Ref.PlacedSelf = Instantiate(Self, Ref.MouseFollower.transform);
             Ref.AzimShower.SetActive(true);
@@ -205,6 +208,7 @@ public class Build : MonoBehaviour
     }
     private void ExitApp()
     {
+        SaveALoad();
         Application.Quit();
     }
 }
